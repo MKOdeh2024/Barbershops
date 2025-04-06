@@ -46,6 +46,7 @@ class User {
 
     @OneToMany(() => Notification, notification => notification.user) // Link to Notification entity
     notifications; // [cite: 123, 141]
+    barberProfiles: any;
 
     // Password hashing method (example)
     async hashPassword(password) {
