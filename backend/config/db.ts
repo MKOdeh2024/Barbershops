@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
         User, Barber, Booking, Service, Payment,
         Notification, Product, BookingProduct, Availability, AdminSetting
     ], //
-    migrations: [], // Define migrations for production
+    migrations: ["src/migrations/*.{js,ts}"], // Define migrations for production
     subscribers: [],
 });
 

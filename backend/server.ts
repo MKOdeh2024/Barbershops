@@ -4,6 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/db.js';
+import { errorHandler, notFound } from './middleware/errorMiddleware.js'; // Import error handlers
 
 // Import Routes
 import authRoutes from './routes/authRoutes.js';
@@ -61,10 +62,9 @@ connectDatabase()
     });
 
     // --- Basic Error Handling --- (Implement more robust error handling)
-    app.use((err, req, res, next) => {
-      console.error(err.stack);
-      res.status(500).send('Something broke!');
-    });
+    // --- Error Handling Middleware --- (Must be LAST middleware)
+   app.use(notFound); // Handle 404 errors first
+   app.use(errorHandler); // Handle all other errors
 
     // --- Start Server ---
     app.listen(PORT, () => {
