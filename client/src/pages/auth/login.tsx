@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Button from '../../components/Button'; // Assuming Button component is styled
 import { AuthContext } from '../../context/AuthContext';
+import Input from '../../components/ui/Input';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {

@@ -1,9 +1,27 @@
-/* Import Tailwind directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Add your custom global styles or base layer modifications here */
-/* body {
-  @apply bg-gray-100 text-gray-900;
-} */
+/* Example: Custom base body style */
+body {
+  @apply bg-gray-50 text-gray-800 antialiased; /* Smooth fonts */
+  /* Or using standard CSS: */
+  /* background-color: #f9fafb; */
+  /* color: #1f2937; */
+  /* -webkit-font-smoothing: antialiased; */
+  /* -moz-osx-font-smoothing: grayscale; */
+}
+
+/* Example: Custom component class using @apply */
+@layer components {
+  .btn-primary-custom {
+    @apply px-4 py-2 bg-teal-600 text-white rounded font-semibold shadow hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2;
+  }
+}
+
+/* Example: Standard CSS for a specific element */
+.special-gradient-text {
+    background: linear-gradient(to right, theme('colors.indigo.500'), theme('colors.purple.500'));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

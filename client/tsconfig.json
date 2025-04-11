@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                            // Modern JavaScript output
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],      // Include DOM types for browser support
+    "module": "ESNext",                            // Use native ES Modules
+    "moduleResolution": "Bundler",                 // For modern bundlers like Vite/Webpack 5
+    "jsx": "react-jsx",                            // Support React JSX (React 17+)
+    "allowJs": true,                               // Allow JavaScript files to be compiled
+    "checkJs": false,                              // Disable type-checking for JS files
+    "esModuleInterop": true,                       // Interop with CommonJS modules
+    "forceConsistentCasingInFileNames": true,      // Ensure consistent file naming
+    "strict": true,                                // Enable all strict type-checking
+    "skipLibCheck": true,                          // Skip type checking of declaration files
+    "resolveJsonModule": true,                     // Allow importing JSON files
+    "isolatedModules": true,                       // Required for Babel/Vite
+    "noEmit": true,                                // Don't emit files, use tsc for type-checking only
+    "incremental": true,                           // Enable faster incremental builds
+    "baseUrl": ".",                                // Set base directory for paths
+    "paths": {
+      "@/*": ["src/*"]                             // Aliases for cleaner imports
+    }
+  },
+  "include": ["src", "tests/LoginPage.test.tsx", "tests/Card.test.tsx", "tests/serviceService.test.ts"],
+  "exclude": ["node_modules", "dist"]
+}
