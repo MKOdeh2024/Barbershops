@@ -96,24 +96,24 @@ describe('LoginPage Component', () => {
   });
 
   test('displays error message on failed login', async () => {
-     // Make mockLogin reject with an error
-     const errorMessage = 'Invalid credentials';
-     mockLogin.mockRejectedValueOnce({ response: { data: { message: errorMessage } } }); // Simulate API error structure
-     renderLoginPage();
-
-     // Simulate user input and submit
-     fireEvent.change(screen.getByPlaceholderText(/email address/i), { target: { value: 'wrong@example.com' } });
-     fireEvent.change(screen.getByPlaceholderText(/^password$/i), { target: { value: 'wrongpass' } });
-     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-
-     // Check if error message is displayed
-     // Use findByText as the error appears asynchronously
-     const errorElement = await screen.findByText(errorMessage);
-     expect(errorElement).toBeInTheDocument();
-
-     // Check that redirection did not happen
-     expect(mockRouterPush).not.toHaveBeenCalled();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); // Suppress error log
+  
+    const errorMessage = 'Invalid credentials';
+    mockLogin.mockRejectedValueOnce({ response: { data: { message: errorMessage } } });
+  
+    renderLoginPage();
+  
+    fireEvent.change(screen.getByPlaceholderText(/email address/i), { target: { value: 'wrong@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/^password$/i), { target: { value: 'wrongpass' } });
+    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
+  
+    const errorElement = await screen.findByText(errorMessage);
+    expect(errorElement).toBeInTheDocument();
+    expect(mockRouterPush).not.toHaveBeenCalled();
+  
+    consoleErrorSpy.mockRestore(); // Restore after test
   });
+  
 
    test('shows loading state on button when submitting', async () => {
         // Make login take some time

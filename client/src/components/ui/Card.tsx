@@ -1,40 +1,26 @@
-// src/components/ui/Card.tsx
-import React, { HTMLAttributes } from 'react';
+// components/Card.tsx
+import React from 'react';
+import clsx from 'clsx';
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-  padding?: 'sm' | 'md' | 'lg' | 'none'; // Control padding size
+type Padding = 'none' | 'sm' | 'md' | 'lg';
+
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  padding?: Padding;
 }
 
-const Card: React.FC<CardProps> = ({
-  children,
-  className = '',
-  padding = 'md', // Default padding
-  ...props
-}) => {
-  const baseClasses = 'bg-white rounded-lg shadow overflow-hidden'; // Base card styles
+const paddingMap: Record<Padding, string> = {
+  none: '',
+  sm: 'p-4',
+  md: 'p-6',
+  lg: 'p-8',
+};
 
-  let paddingClasses = '';
-  switch (padding) {
-    case 'sm':
-      paddingClasses = 'p-4';
-      break;
-    case 'lg':
-      paddingClasses = 'p-8';
-      break;
-    case 'none':
-      paddingClasses = '';
-      break;
-    case 'md':
-    default:
-      paddingClasses = 'p-6';
-      break;
-  }
-
-  const finalClassName = `${baseClasses} ${paddingClasses} ${className}`;
-
+const Card: React.FC<CardProps> = ({ children, className = '', padding = 'md', ...props }) => {
   return (
-    <div className={finalClassName} {...props}>
+    <div
+      className={clsx('bg-white rounded-lg shadow', paddingMap[padding], className)}
+      {...props}
+    >
       {children}
     </div>
   );
