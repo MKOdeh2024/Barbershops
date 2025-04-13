@@ -5,14 +5,14 @@
   "main": "./dist/server.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch --config jest.config.ts",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.js",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
     "build-tsc": "tsc -w",
     "run-watch": "nodemon ./dist/server.js",
     "dev": "concurrently \"npm:build-tsc\" \"npm:run-watch\"",
     "start": "node ./dist/server.js",
-    "typeorm": "typeorm-ts-node-commonjs -d ./src/config/db.js",
-    "migration:generate": "npm run typeorm -- migration:generate ./src/migrations/$npm_config_name",
+    "typeorm": "typeorm-ts-node-commonjs -d ./config/db.js",
+    "migration:generate": "npm run typeorm -- migration:generate ./migrations/$npm_config_name",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert"
   },
@@ -40,6 +40,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^18.19.86",
     "@types/supertest": "^6.0.3",
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
     "nodemon": "^2.0.15",
     "supertest": "^7.1.0",
@@ -47,9 +48,5 @@
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.5"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
   }
 }

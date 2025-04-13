@@ -1,5 +1,6 @@
 // tests/controllers/serviceController.test.js
 import request from 'supertest';
+import 'jest';
 import express from 'express';
 import { createService } from '../../backend/controllers/serviceController.js';
 import { AppDataSource } from '../../backend/config/db.js';

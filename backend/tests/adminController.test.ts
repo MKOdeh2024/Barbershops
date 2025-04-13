@@ -18,19 +18,20 @@ const mockSave = jest.fn();
 const mockFindOne = jest.fn();
 const mockTransaction = jest.fn();
 
-jest.mock('../../backend/config/db.js', () => {
-  const mockRepository = {
-    find: jest.fn(),
-    save: jest.fn(),
-  };
+const mockRepository = {
+  find: mockFind,
+  save: mockSave,
+  findOne: mockFindOne,
+};
 
-  return {
-    AppDataSource: {
-      getRepository: () => mockRepository,
-      transaction: jest.fn(() => Promise.reject(new Error('Transaction Error'))),
-    },
-  };
-});
+jest.mock('../../backend/config/db.js', () => ({
+  AppDataSource: {
+    getRepository: jest.fn(() => mockRepository),
+    transaction: jest.fn(),
+  },
+}));
+
+
 
 describe('AdminController', () => {
   afterEach(() => {
@@ -44,7 +45,9 @@ describe('AdminController', () => {
         { setting_key: 'max_users', setting_value: '1000' },
       ];
 
-      (AppDataSource.getRepository(AdminSetting).find as jest.Mock).mockResolvedValue(mockSettings as never);
+      //(AppDataSource.getRepository(AdminSetting).find as jest.Mock).mockResolvedValue(mockSettings as never);
+      mockFind.mockResolvedValue(mockSettings as never);
+
 
       const res = await request(app).get('/api/admin/settings');
 
@@ -57,7 +60,8 @@ describe('AdminController', () => {
     });
 
     it('should return 500 if there is a server error', async () => {
-      (AppDataSource.getRepository(AdminSetting).find as jest.Mock).mockResolvedValue(new Error('DB Error') as never);
+      mockFind.mockRejectedValue(new Error('DB Error') as never);
+
       
       const res = await request(app).get('/api/admin/settings');
 
@@ -74,14 +78,10 @@ describe('AdminController', () => {
       };
 
       (AppDataSource.transaction as jest.Mock).mockImplementation(async (callback: any) => {
-        await callback({
-          findOne: async (model: any, { where: { setting_key } }) => ({
-            setting_key,
-            setting_value: 'old_value',
-          }),
-          save: jest.fn(),
-        });
+        await callback(mockRepository); // Mock the repository
       });
+      
+      
 
       const res = await request(app).put('/api/admin/settings').send(updatePayload);
 

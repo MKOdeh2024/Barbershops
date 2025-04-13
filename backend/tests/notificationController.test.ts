@@ -1,5 +1,6 @@
 import request from 'supertest';
 import express from 'express';
+import { jest } from '@jest/globals';
 import { getUserNotifications, markNotificationsRead, deleteNotification } from '../../backend/controllers/notificationController.js';
 import Notification from '../../backend/config/models/Notification.js';
 
@@ -75,7 +76,8 @@ describe('Notification Controller', () => {
   });
 
   test('PUT /api/notifications/read should mark notifications as read', async () => {
-    const executeMock = jest.fn().mockResolvedValue({ affected: 2 });
+    type Result = { affected: number };
+    const executeMock = jest.fn<() => Promise<Result>>(() => Promise.resolve({ affected: 2 }));
     mockRepo.createQueryBuilder.mockReturnValueOnce({
       update: jest.fn().mockReturnThis(),
       set: jest.fn().mockReturnThis(),
