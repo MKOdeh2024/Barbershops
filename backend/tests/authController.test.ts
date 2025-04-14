@@ -21,6 +21,11 @@ const mockUserRepository = {
     findOne: jest.fn(),
 };
 
+beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  
 // Mock AppDataSource.getRepository using alias (preferred) or corrected relative path
 // Ensure alias '@/' is configured in jest.config.js and tsconfig.json
 jest.mock('../config/db', () => ({ // Using alias

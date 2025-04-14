@@ -1,6 +1,7 @@
 // config/db.js (or db.ts)
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
+//import mysql2 from 'mysql2'
 // Import your entities
 import User from '../config/models/User.js';
 import Barber from '../config/models/Barber.js';
@@ -18,23 +19,25 @@ dotenv.config({ path: '../.env' }); // Adjust path as necessary
 export const AppDataSource = new DataSource({
     type: process.env.DB_TYPE as 'postgres' || 'mysql', // Default to postgres
     host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    synchronize: process.env.NODE_ENV === 'development', // Auto-create schema in dev, disable in prod
+    //driver: mysql2,
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    username: process.env.DB_USERNAME || 'root',
+    password: process.env.DB_PASSWORD || 'root',
+    database: process.env.DB_NAME || 'barbershops',
+    synchronize: true, // Auto-create schema in dev, disable in prod
     logging: process.env.NODE_ENV === 'development', // Log SQL queries in dev
     entities: [
         User, Barber, Booking, Service, Payment,
         Notification, Product, BookingProduct, Availability, AdminSetting
     ], //
-    migrations: ["src/migrations/*.{js,ts}"], // Define migrations for production
+    migrations: ["./migrations/*.{js,ts}"], // Define migrations for production
     subscribers: [],
 });
 
 export const connectDatabase = async () => {
     try {
         await AppDataSource.initialize();
+        console.log("Data Source has been initialized!");
     } catch (error) {
         console.error("Error during Data Source initialization:", error);
         throw error; // Re-throw error to be caught by server startup logic
