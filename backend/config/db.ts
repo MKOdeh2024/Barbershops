@@ -17,12 +17,12 @@ import AdminSetting from '../config/models/AdminSetting.js';
 dotenv.config({ path: '../.env' }); // Adjust path as necessary
 
 export const AppDataSource = new DataSource({
-    type: process.env.DB_TYPE as 'postgres' || 'mysql', // Default to postgres
+    type: process.env.DB_TYPE as 'mysql', // Default to postgres
     host: process.env.DB_HOST,
     //driver: mysql2,
     port: parseInt(process.env.DB_PORT || '3306', 10),
     username: process.env.DB_USERNAME || 'root',
-    password: process.env.DB_PASSWORD || 'root',
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'barbershops',
     synchronize: true, // Auto-create schema in dev, disable in prod
     logging: process.env.NODE_ENV === 'development', // Log SQL queries in dev

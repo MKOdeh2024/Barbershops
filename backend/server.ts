@@ -20,7 +20,7 @@ import adminRoutes from './routes/adminRoutes.js';
 dotenv.config({ path: './.env' });
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
 app.use(cors()); // Enable CORS - configure origins properly for production
@@ -41,8 +41,10 @@ app.use(express.json()); // Body parser for JSON requests (must come after raw p
 app.use(express.urlencoded({ extended: true })); // Body parser for URL-encoded requests
 
 // --- Database Connection ---
-connectDatabase()
-  .then(() => {
+const startServer = async () => {
+  try {
+    // Wait for database connection before starting the server
+    await connectDatabase();
     console.log('Database connected successfully');
 
     // --- API Routes ---
@@ -61,20 +63,22 @@ connectDatabase()
       res.send('Barbershop API Running');
     });
 
-    // --- Basic Error Handling --- (Implement more robust error handling)
-    // --- Error Handling Middleware --- (Must be LAST middleware)
-   app.use(notFound); // Handle 404 errors first
-   app.use(errorHandler); // Handle all other errors
+    // --- Basic Error Handling ---
+    app.use(notFound); // Handle 404 errors
+    app.use(errorHandler); // Handle other errors
 
     // --- Start Server ---
     app.listen(PORT, () => {
       console.log(`Backend server running on port ${PORT}`);
     });
 
-  })
-  .catch(error => {
-    console.error('Database connection failed:', error);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.log('Database connection failed:', error);
+    process.exit(1); // Exit the process if the database connection fails
+  }
+};
+
+// Start the server
+startServer();
 
 export default app;

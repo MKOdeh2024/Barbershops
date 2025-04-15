@@ -2,6 +2,7 @@ import React, { ReactNode, useContext } from 'react';
 import Link from 'next/link';
 import Button from '../components/Button'; // Assuming Button component exists
 import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import Card from './ui/Card';
 
 interface LayoutProps {
   children: ReactNode;
