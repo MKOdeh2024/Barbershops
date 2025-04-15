@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="bg-gray-800 text-white shadow-md">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link href="/" className="text-xl font-bold hover:text-gray-300">
-            BarberShop
+            BarberShops
           </Link>
           <div className="space-x-4 flex items-center">
             <Link href="/#services" className="hover:text-gray-300">Services</Link>

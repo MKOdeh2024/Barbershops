@@ -8,6 +8,9 @@ import Button from '../../components/Button';
 import { registerUser } from '../../services/authService'; // Import API call function
 import { AuthContext } from '../../context/AuthContext';
 
+// Define allowed roles based on your backend/document (Admin is the main Barber)
+type UserRole = 'Client' | 'Co-Barber' | 'Admin';
+
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -16,6 +19,7 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState(''); // Optional
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<UserRole>('Client'); // Default role to Client
   const { login } = useContext(AuthContext); // Use login after registration
   const router = useRouter();
 
@@ -29,7 +33,8 @@ export default function RegisterPage() {
           last_name: lastName,
           email: email,
           password: password,
-          phone_number: phone || undefined // Send undefined if empty
+          phone_number: phone || undefined, // Send undefined if empty
+          role: role, // Include selected role
       };
       await registerUser(registrationData); // Await the registration call
 
@@ -151,6 +156,29 @@ export default function RegisterPage() {
                     />
                  </div>
              </div>
+
+             {/* Role Selector */}
+             <div>
+                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                        Registering as a
+                    </label>
+                    <select
+                        id="role"
+                        name="role"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value as UserRole)}
+                        required
+                        // Apply similar styling as Input component
+                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm bg-white"
+                    >
+                        {/* List roles based on document [cite: 33, 34, 35] */}
+                        <option value="Client">Client</option>
+                        <option value="Co-Barber">Co-Barber</option>
+                        {/* Consider removing 'Admin' option for security */}
+                        <option value="Admin">Admin (Barber)</option>
+                    </select>
+                    <p className="mt-1 text-xs text-gray-500">Note: Role selection might require admin approval.</p>
+                 </div>
 
             {/* Error Message Display */}
             {error && (
