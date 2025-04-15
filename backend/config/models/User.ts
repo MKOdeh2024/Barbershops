@@ -26,7 +26,7 @@ class User {
 
     @Column({
         type: 'enum',
-        enum: ['Admin', 'Co-Barber', 'Client'], // [cite: 33, 34, 35, 122]
+        enum: ['Admin', 'barber', 'Co-Barber', 'Client'], // [cite: 33, 34, 35, 122]
         default: 'Client'
     })
     role; // [cite: 122]
