@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Determine the base URL based on environment
 // Use NEXT_PUBLIC_ prefix for environment variables accessible on the client-side
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'; // Default to backend dev URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; // Default to backend dev URL
 
 const api = axios.create({
   baseURL: API_BASE_URL,

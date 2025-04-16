@@ -20,7 +20,7 @@ import adminRoutes from './routes/adminRoutes.js';
 dotenv.config({ path: './.env' });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // --- Middleware ---
 app.use(cors()); // Enable CORS - configure origins properly for production
@@ -60,7 +60,8 @@ const startServer = async () => {
 
     // Basic Root Route
     app.get('/', (req, res) => {
-      res.send('Barbershop API Running');
+      console.log("Server is running on root route");
+      //res.send('Barbershop API Running');
     });
 
     // --- Basic Error Handling ---

@@ -5,28 +5,28 @@ import Booking from './Booking.js';
 @Entity('services')
 class Service {
     @PrimaryGeneratedColumn()
-    service_id;
+    service_id: any;
 
     @Column({ length: 100 })
-    name; // [cite: 128]
+    name : string; // [cite: 128]
 
     @Column({ type: 'text', nullable: true })
-    description; // [cite: 128]
+    description : string; // [cite: 128]
 
     @Column({ type: 'decimal', precision: 10, scale: 2 })
-    price; // [cite: 128, 75]
+    price : number; // [cite: 128, 75]
 
     @Column() // In minutes or similar unit
-    estimated_duration; // [cite: 128, 41]
+    estimated_duration: number; // [cite: 128, 41]
 
     @Column({ length: 50, nullable: true }) // e.g., 'Haircut Services', 'Hair Dye & Coloring Services' [cite: 41, 75]
-    category;
+    category: string;
 
-    @CreateDateColumn()
-    created_at;
+    @CreateDateColumn( { type: 'timestamp' })
+    created_at : Date;
 
-    @UpdateDateColumn()
-    updated_at;
+    @UpdateDateColumn({ type: 'timestamp' })
+    updated_at : Date;
 
     // Relationships
     @OneToMany(() => Booking, booking => booking.service) // [cite: 128, 138]

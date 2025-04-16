@@ -5,30 +5,30 @@ import User from './User.js';
 @Entity('notifications')
 class Notification {
     @PrimaryGeneratedColumn()
-    notification_id;
+    notification_id: any;
 
     @ManyToOne(() => User, user => user.notifications) // [cite: 130, 141]
     @JoinColumn({ name: 'user_id' })
-    user; // User receiving the notification
+    user: any; // User receiving the notification
 
     @Column()
-    user_id; // Foreign Key to User table [cite: 130]
+    user_id: any; // Foreign Key to User table [cite: 130]
 
     @Column({ type: 'text' })
-    message; // [cite: 130]
+    message: any; // [cite: 130]
 
     @Column({
         type: 'enum',
         enum: ['Sent', 'Read', 'Unread'], // [cite: 130]
         default: 'Unread'
     })
-    status;
+    status: any;
 
     @Column({ nullable: true }) // Optional: Type of notification (e.g., 'Reminder', 'Confirmation', 'Cancellation')
-    type;
+    type: string;
 
-    @CreateDateColumn()
-    created_at; // [cite: 130]
+    @CreateDateColumn({ type: 'timestamp' })
+    created_at: Date; // [cite: 130]
 }
 
 export default Notification;

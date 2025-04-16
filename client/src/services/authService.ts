@@ -12,7 +12,7 @@ export interface RegistrationData {
     email: string;
     password: string;
     phone_number?: string;
-    role?: 'Client' | 'Co-Barber' | 'Admin'; // Optional role on registration?
+    role?: 'Client' | 'barber' | 'Co-Barber' | 'Admin'; // Optional role on registration?
 }
 
 // Define expected user structure after login/registration
@@ -46,14 +46,14 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
     }
 };
 
-export const registerUser = async (data: RegistrationData): Promise<RegisterResponse> => {
+export const registerUser = async (data: RegistrationData): Promise<any> => {
      try {
         // Ensure role isn't sent unless intended and allowed by backend validation
         const payload: Partial<RegistrationData> = { ...data };
         // delete payload.role; // Example: Prevent sending role if it should default
 
-        const response = await api.post<RegisterResponse>('/auth/register', payload);
-        return response.data;
+        const response = await api.post('/auth/register', payload);
+        return response.status === 201 ? window.location.href = '/auth/login' : Promise.reject(new Error('Registration failed'));
     } catch (error) {
         console.error('Register API call failed:', error);
         throw error;

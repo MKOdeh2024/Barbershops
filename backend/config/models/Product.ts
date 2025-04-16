@@ -5,39 +5,39 @@ import BookingProduct from './BookingProduct.js'; // For ManyToMany relation
 @Entity('products')
 class Product {
     @PrimaryGeneratedColumn()
-    product_id;
+    product_id: any;
 
     @Column({ length: 150 })
-    name; // [cite: 131]
+    name: string; // [cite: 131]
 
     @Column({ type: 'text', nullable: true })
-    description; // [cite: 131]
+    description: any; // [cite: 131]
 
     @Column({ type: 'decimal', precision: 10, scale: 2 })
-    price; // [cite: 131]
+    price: any; // [cite: 131]
 
     @Column({ type: 'int', default: 0 })
-    stock_quantity; // [cite: 131]
+    stock_quantity: any; // [cite: 131]
 
     @Column({
         type: 'enum',
         enum: ['Haircare', 'Skincare', 'Tools', 'Beardcare'], // [cite: 131, 71] Added Beardcare based on doc
         nullable: true
     })
-    category;
+    category: any;
 
     @Column({ nullable: true }) // URL for product image
-    image_url;
+    image_url: string;
 
     @CreateDateColumn()
-    created_at; // [cite: 131]
+    created_at: any; // [cite: 131]
 
     @UpdateDateColumn()
-    updated_at; // [cite: 131]
+    updated_at: any; // [cite: 131]
 
     // Relationships
     @OneToMany(() => BookingProduct, bookingProduct => bookingProduct.product) // For ManyToMany with Booking [cite: 140]
-    bookingProducts;
+    bookingProducts: any;
 }
 
 export default Product;

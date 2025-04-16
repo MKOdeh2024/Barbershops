@@ -7,17 +7,17 @@ import Availability from './Availability.js';
 @Entity('barbers')
 class Barber {
     @PrimaryGeneratedColumn()
-    barber_id;
+    barber_id: number;
 
     @ManyToOne(() => User, user => user.barberProfiles) // Link back to the User account
     @JoinColumn({ name: 'user_id' }) // Explicitly define the foreign key column name
-    user; // This holds the User entity associated with the barber
+    user: any; // This holds the User entity associated with the barber
 
     @Column({ nullable: true }) // Store user_id directly as well if needed, though the relation is preferred
-    user_id; // Foreign Key to User table
+    user_id: any; // Foreign Key to User table
 
     @Column({ nullable: true, length: 100 })
-    specialization; //
+    specialization : string; //
 
     // available_hours might be better managed in the Availability entity
     // @Column({ nullable: true })
@@ -28,20 +28,20 @@ class Barber {
         enum: ['Active', 'Inactive'], //
         default: 'Active'
     })
-    status;
+    status: any;
 
     @CreateDateColumn()
-    created_at;
+    created_at: any;
 
     @UpdateDateColumn()
-    updated_at;
+    updated_at: any;
 
     // Relationships
     @OneToMany(() => Booking, booking => booking.barber) //
-    bookings;
+    bookings: any;
 
     @OneToMany(() => Availability, availability => availability.barber) //
-    availabilitySlots;
+    availabilitySlots: any;
 }
 
 export default Barber;
