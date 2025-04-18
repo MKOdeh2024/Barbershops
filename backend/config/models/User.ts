@@ -34,6 +34,17 @@ class User {
     @Column({ nullable: true })
     profile_picture: string; // [cite: 122]
 
+    // --- New Fields for Email Confirmation ---
+    @Column({ type: 'boolean', default: false })
+    is_verified: boolean;
+
+    @Column({ type: 'varchar', length: 255, nullable: true, select: false }) // Select false prevents fetching by default
+    confirmation_token: string | null;
+
+    @Column({ type: 'timestamp', nullable: true, select: false }) // Select false prevents fetching by default
+    confirmation_token_expires: Date | null;
+    // --- End New Fields ---
+
     @CreateDateColumn({ type: 'timestamp' })
     created_at: Date; // [cite: 122]
 
