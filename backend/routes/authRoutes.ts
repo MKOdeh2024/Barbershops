@@ -1,6 +1,6 @@
 // backend/routes/authRoutes.js
 import express from 'express';
-import { registerUser, loginUser, getMe } from '../controllers/authController.js';
+import { registerUser, loginUser, getMe, confirmRegistration } from '../controllers/authController.js';
 import { protect } from '../routes/authMiddleware.js';
 // Import validation rules and handler
 import { registerValidationRules, loginValidationRules, handleValidationErrors } from '../validators/authValidator.js';
@@ -14,6 +14,8 @@ router.post(
     handleValidationErrors,   // Handle potential errors
     registerUser             // Proceed to controller if valid
 );
+
+router.get('/confirm/:token', confirmRegistration);
 
 router.post(
     '/login',
