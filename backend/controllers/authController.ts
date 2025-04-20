@@ -63,7 +63,7 @@ export const registerUser = async (req, res) => {
 
     // --- Send Confirmation Email ---
     // Construct confirmation URL (adjust URLs from .env)
-    const confirmUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/confirm/${token}`;
+    const confirmUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/confirm/${confirmToken}`;
 
     try {
         // Replace with your actual email sending logic
@@ -71,7 +71,7 @@ export const registerUser = async (req, res) => {
         console.log(`Confirmation email supposedly sent to ${user.email} with link: ${confirmUrl}`); // Log for debugging
 
         // Respond to user indicating email has been sent
-        res.status(201).json({
+        return res.status(201).json({
             message: 'Registration successful! Please check your email to confirm your account.',
             // DO NOT send user details or token here
         });
@@ -80,9 +80,8 @@ export const registerUser = async (req, res) => {
         console.error("Failed to send confirmation email:", emailError);
         // Consider how to handle this - maybe delete the user or mark for retry?
         // For now, return a generic server error but log the specific issue.
-        return res.status(500).json({ message: 'Registration succeeded but failed to send confirmation email. Please contact support.' });
+        res.status(500).json({ message: 'Registration succeeded but failed to send confirmation email. Please contact support.' });
     }
-    // -----------------------------
 
     res.status(201).json({
       user_id: savedUser.user_id,
@@ -91,6 +90,7 @@ export const registerUser = async (req, res) => {
       role: savedUser.role,
       token: token, // Send token upon successful registration
     });
+
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error during registration' });
