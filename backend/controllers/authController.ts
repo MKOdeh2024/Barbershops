@@ -61,34 +61,23 @@ export const registerUser = async (req, res) => {
       jwtSecret
     );
 
-    // --- Send Confirmation Email ---
-    // Construct confirmation URL (adjust URLs from .env)
-    const confirmUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/confirm/${confirmToken}`;
+     // Construct confirmation URL (adjust URLs from .env)
+     const confirmUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/confirm/${confirmToken}`;
 
     try {
         // Replace with your actual email sending logic
         await sendConfirmationEmail(user.email, user.first_name, confirmUrl);
         console.log(`Confirmation email supposedly sent to ${user.email} with link: ${confirmUrl}`); // Log for debugging
-
-        // Respond to user indicating email has been sent
-        return res.status(201).json({
-            message: 'Registration successful! Please check your email to confirm your account.',
-            // DO NOT send user details or token here
-        });
-
     } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
         // Consider how to handle this - maybe delete the user or mark for retry?
         // For now, return a generic server error but log the specific issue.
-        res.status(500).json({ message: 'Registration succeeded but failed to send confirmation email. Please contact support.' });
+        return res.status(500).json({ message: 'Registration succeeded but failed to send confirmation email. Please contact support.' });
     }
-
-    res.status(201).json({
-      user_id: savedUser.user_id,
-      first_name: savedUser.first_name,
-      email: savedUser.email,
-      role: savedUser.role,
-      token: token, // Send token upon successful registration
+    // Respond to user indicating email has been sent
+     return res.status(201).json({
+        message: 'Registration successful! Please check your email to confirm your account.',
+        // DO NOT send user details or token here
     });
 
   } catch (error) {

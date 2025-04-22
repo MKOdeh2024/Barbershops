@@ -58,7 +58,7 @@ const startServer = async () => {
     app.use('/api/products', productRoutes);
     app.use('/api/admin', adminRoutes);
 
-    // Basic Root Route
+    // Basic Root Route (for testing)
     app.get('/', (req, res) => {
       console.log("Server is running on root route");
       //res.send('Barbershop API Running');
