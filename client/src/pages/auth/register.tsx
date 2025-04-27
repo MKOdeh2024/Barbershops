@@ -1,14 +1,13 @@
 // src/pages/auth/register.tsx
-import { useState, FormEvent, useContext } from 'react';
-import React from 'react';
+import { useState, FormEvent } from 'react'; // Removed useContext, login
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import Button from '../../components/Button';
-import { registerUser } from '../../services/authService'; // Import API call function
-import { AuthContext } from '../../context/AuthContext';
+import Button from '@/components/Button';
+import Input from '@/components/ui/Input';
+import { registerUser } from '@/services/authService';
+// Removed AuthContext import as we don't auto-login now
 
-// Define allowed roles based on your backend/document (Admin is the main Barber)
 type UserRole = 'Client' | 'Co-Barber' | 'Admin';
 
 export default function RegisterPage() {
@@ -16,11 +15,11 @@ export default function RegisterPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState(''); // Optional
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState<UserRole>('Client');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<UserRole>('Client'); // Default role to Client
-  const { login } = useContext(AuthContext); // Use login after registration
+  // Removed login from useContext
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -29,29 +28,23 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const registrationData = {
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          password: password,
-          phone_number: phone || undefined, // Send undefined if empty
-          role: role, // Include selected role
+          first_name: firstName, last_name: lastName,
+          email: email, password: password,
+          phone_number: phone || undefined,
+          role: role,
       };
-      await registerUser(registrationData); // Await the registration call
+      // Call registration API
+      const response = await registerUser(registrationData);
 
-      // Automatically try to log in the user after successful registration
-      if (login) {
-          try {
-            await login(email, password); // Assumes login uses email/password
-            router.push('/dashboard'); // Redirect after successful auto-login
-          } catch (loginErr: any) {
-             console.error("Auto-login after registration failed:", loginErr);
-             // Redirect to login page with a success message if auto-login fails
-             router.push('/auth/login?registered=true');
-          }
+      // --- Redirect to verification page on success ---
+      // Pass the email used for registration as a query parameter
+      if (response.email) {
+           router.push(`/auth/verify-email?email=${encodeURIComponent(response.email)}`);
       } else {
-          // Fallback: redirect to login page if login context function isn't available
-           router.push('/auth/login?registered=true');
+          // Fallback if email isn't returned (shouldn't happen with current backend)
+          setError("Registration successful, but couldn't redirect to verification. Please check your email.");
       }
+      // --- End Redirect Logic ---
 
     } catch (err: any) {
       console.error("Registration failed:", err);
@@ -61,160 +54,46 @@ export default function RegisterPage() {
     }
   };
 
+  // --- Rest of the component (JSX) remains the same as before ---
+  // Make sure the JSX includes the Role Selector dropdown
   return (
      <>
       <Head>
         <title>Sign Up - Barbershop Booking</title>
       </Head>
-       {/* Outer container for centering */}
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
-        {/* Registration Card */}
         <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-xl md:p-10">
-           {/* Header */}
           <div>
-             {/* Optional: Add Logo here */}
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
               Create your account
             </h2>
           </div>
-
-          {/* Registration Form */}
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-             {/* Input Fields Container */}
-             <div className="space-y-4 rounded-md shadow-sm">
-                 {/* First Name */}
+             <div className="space-y-4 rounded-md">
+                 <Input id="firstName" label="First Name" type="text" autoComplete="given-name" required value={firstName} onChange={e=>setFirstName(e.target.value)} placeholder="Enter first name" />
+                 <Input id="lastName" label="Last Name" type="text" autoComplete="family-name" required value={lastName} onChange={e=>setLastName(e.target.value)} placeholder="Enter last name" />
+                 <Input id="email" label="Email Address" type="email" autoComplete="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" />
+                 <Input id="password" label="Password" type="password" autoComplete="new-password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Choose a password (min. 8 characters)" minLength={8} />
+                 <Input id="phone" label="Phone Number (Optional)" type="tel" autoComplete="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Enter phone number" />
                  <div>
-                    <label htmlFor="firstName" className="sr-only">First Name</label>
-                    <input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        autoComplete="given-name"
-                        required
-                        value={firstName}
-                        onChange={e=>setFirstName(e.target.value)}
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                        placeholder="First Name"
-                    />
-                 </div>
-                 {/* Last Name */}
-                 <div>
-                    <label htmlFor="lastName" className="sr-only">Last Name</label>
-                    <input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        autoComplete="family-name"
-                        required value={lastName}
-                        onChange={e=>setLastName(e.target.value)}
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Last Name"
-                    />
-                 </div>
-                {/* Email */}
-                  <div>
-                    <label htmlFor="email" className="sr-only">Email address</label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required value={email}
-                        onChange={e=>setEmail(e.target.value)}
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Email address"
-                    />
-                 </div>
-                 {/* Password */}
-                  <div>
-                    <label htmlFor="password" className="sr-only">Password</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="new-password"
-                        required
-                        value={password}
-                        onChange={e=>setPassword(e.target.value)}
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Password (min. 8 characters)"
-                        minLength={8} // Basic HTML validation
-                    />
-                 </div>
-                 {/* Phone Number (Optional) */}
-                 <div>
-                    <label htmlFor="phone" className="sr-only">Phone Number (Optional)</label>
-                    <input
-                        id="phone"
-                        name="phone"
-                        type="tel" // Use 'tel' type for mobile keyboards
-                        autoComplete="tel"
-                        value={phone}
-                        onChange={e=>setPhone(e.target.value)}
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                        placeholder="Phone Number (Optional)"
-                    />
-                 </div>
-             </div>
-
-             {/* Role Selector */}
-             <div>
-                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                        Registering as a
-                    </label>
-                    <select
-                        id="role"
-                        name="role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value as UserRole)}
-                        required
-                        // Apply similar styling as Input component
-                        className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm bg-white"
-                    >
-                        {/* List roles based on document [cite: 33, 34, 35] */}
+                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Registering as a</label>
+                    <select id="role" name="role" value={role} onChange={(e) => setRole(e.target.value as UserRole)} required className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm bg-white">
                         <option value="Client">Client</option>
                         <option value="Co-Barber">Co-Barber</option>
-                        {/* Consider removing 'Admin' option for security */}
                         <option value="Admin">Admin (Barber)</option>
                     </select>
                     <p className="mt-1 text-xs text-gray-500">Note: Role selection might require admin approval.</p>
                  </div>
-
-            {/* Error Message Display */}
-            {error && (
-                <div className="rounded-md bg-red-50 p-4">
-                    <div className="flex">
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-red-800">{error}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Submit Button */}
+             </div>
+            {error && <div className="rounded-md bg-red-50 p-4"><p className="text-sm font-medium text-red-800">{error}</p></div>}
             <div>
               <Button type="submit" variant="primary" fullWidth disabled={loading}>
-                {loading ? (
-                     <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Creating Account...
-                    </span>
-                ) : (
-                  'Create Account'
-                )}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </div>
           </form>
-
-           {/* Link to Login Page */}
            <p className="mt-4 text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-              Sign in here
-            </Link>
+            Already have an account?{' '} <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">Sign in here</Link>
           </p>
         </div>
       </div>
