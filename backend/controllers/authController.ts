@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto'; // Built-in Node module for token generation
 import nodemailer from 'nodemailer'; // Example email sender library
-import { sendConfirmationEmail } from '../utils/emailSender.js'; // Example path
+import { sendConfirmationCodeEmail } from '../utils/emailSender.js'; // Example path
 
 const userRepository = AppDataSource.getRepository(User);
 
@@ -29,6 +29,11 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Generate 6-digit confirmation code
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6 digits
+    //const codeExpiry = new Date(Date.now() + 10 * 60 * 1000); // Code expires in 10 minutes
+
+
     const user = new User();
     user.first_name = first_name;
     user.last_name = last_name;
@@ -39,7 +44,7 @@ export const registerUser = async (req, res) => {
     await user.hashPassword(password); // Hash password using method in User model
 
     // Generate confirmation token
-    const confirmToken = crypto.randomBytes(32).toString('hex');
+    const confirmToken = code + crypto.randomBytes(3).toString('hex'); // 6 digits + 6 random hex characters
     user.confirmation_token = confirmToken;
     // Set token expiry (e.g., 1 hour from now)
     user.confirmation_token_expires = new Date(Date.now() + 3600 * 1000); // 1 hour
@@ -61,13 +66,10 @@ export const registerUser = async (req, res) => {
       jwtSecret
     );
 
-     // Construct confirmation URL (adjust URLs from .env)
-     const confirmUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/confirm/${confirmToken}`;
-
     try {
         // Replace with your actual email sending logic
-        await sendConfirmationEmail(user.email, user.first_name, confirmUrl);
-        console.log(`Confirmation email supposedly sent to ${user.email} with link: ${confirmUrl}`); // Log for debugging
+        await sendConfirmationCodeEmail(user.email, user.first_name, code);
+        console.log(`Confirmation email supposedly sent to ${user.email} with Code : ${code}`); // Log for debugging
     } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
         // Consider how to handle this - maybe delete the user or mark for retry?
@@ -91,44 +93,59 @@ export const registerUser = async (req, res) => {
 // @desc    Confirm registration by link email
 // @route   POST /api/v1/auth/confirm-registration-by-link-email
 // --- confirmRegistration (New Function) ---
-export const confirmRegistration = async (req, res) => {
-  const { token } = req.params;
+// --- verifyEmailCode (New Function) ---
+export const verifyEmailCode = async (req, res) => {
+  const { email, code } = req.body;
 
-  if (!token) {
-      return res.status(400).send('Confirmation token missing.'); // Or redirect to an error page
+  if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required.' });
+  }
+
+  // Validate code format (e.g., 6 digits)
+  if (!/^\d{6}$/.test(code)) {
+       return res.status(400).json({ message: 'Invalid code format. Must be 6 digits.' });
   }
 
   try {
-      // Find user by token, ensuring token fields were selected
+      // Find user by email, selecting the necessary fields for verification
       const user = await userRepository.createQueryBuilder("user")
-          .addSelect(["user.confirmation_token", "user.confirmation_token_expires"]) // Explicitly select needed fields
-          .where("user.confirmation_token = :token", { token })
+          .addSelect(["user.confirmation_code", "user.confirmation_token_expires"]) // Select needed fields
+          .where("user.email = :email", { email })
           .getOne();
 
       if (!user) {
-          return res.status(400).send('Invalid confirmation token.'); // Or redirect
+          // Avoid revealing if email exists or not for security - generic message
+          return res.status(400).json({ message: 'Invalid email or verification code.' });
       }
 
-      // Check if token has expired
-      if (!user.confirmation_token_expires || user.confirmation_token_expires < new Date()) {
-          // TODO: Optionally allow resending confirmation email here
-          return res.status(400).send('Confirmation token has expired.'); // Or redirect
+      if (user.is_verified) {
+          return res.status(400).json({ message: 'Account already verified.' });
       }
 
-      // Token is valid, verify the user
+      // Check if code matches and hasn't expired
+      if (!user.confirmation_token || !user.confirmation_token_expires || user.confirmation_token_expires < new Date()) {
+          // TODO: Optionally allow resending code
+          return res.status(400).json({ message: 'Verification code has expired or is invalid. Please request a new one.' });
+      }
+
+      if (user.confirmation_token !== code) {
+          // TODO: Implement attempt limiting?
+          return res.status(400).json({ message: 'Invalid email or verification code.' });
+      }
+
+      // Code is valid! Verify the user.
       user.is_verified = true;
-      user.confirmation_token = null; // Clear the token
+      user.confirmation_token = null; // Clear the code
       user.confirmation_token_expires = null; // Clear expiry
 
       await userRepository.save(user);
 
-      // Redirect user to the frontend login page with a success indicator
-      const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login?confirmed=true`;
-      res.redirect(loginUrl);
+      // Respond with success
+      res.status(200).json({ message: 'Account verified successfully!' });
 
   } catch (error) {
-      console.error('Confirmation error:', error);
-      res.status(500).send('An error occurred during account confirmation.'); // Or redirect to generic error page
+      console.error('Verification error:', error);
+      res.status(500).json({ message: 'An error occurred during account verification.' });
   }
 };
 

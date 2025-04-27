@@ -1,5 +1,5 @@
 {
-  "name": "barbershop-backend",
+  "name": "Trimly",
   "version": "1.0.0",
   "description": "Backend for the Barbershop Booking App",
   "main": "./dist/server.js",
