@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useBooking } from '../../context/BookingContext';
 import { getBarberAvailability, AvailabilitySlot } from '../../services/barberService';
 import Button from '../../components/Button';
-// Note: A real implementation would use a proper Calendar library (e.g., react-day-picker, react-calendar)
-// This is a highly simplified placeholder.
+import { getBookingsForBarberAndDate } from '../../services/bookingService'; // New import
 
 // Helper function to format date to YYYY-MM-DD
 const formatDateToYYYYMMDD = (date: Date): string => {
@@ -20,19 +19,22 @@ const generateTimeSlots = (start: string, end: string, durationMinutes: number, 
     while (currentTime.getTime() + bookingDurationMs <= endTime.getTime()) {
         const slotStartTimeStr = currentTime.toISOString().substring(11, 16); // HH:MM format
 
-        // TODO: Add more robust check against existingBookings for this specific day
-        const isSlotAvailable = true; // Placeholder - needs real check
+        // Check if slot overlaps with any existing booking
+        const isSlotAvailable = !existingBookings.some(booking => {
+            const bookingStart = new Date(`1970-01-01T${booking.startTime}Z`).getTime();
+            const bookingEnd = new Date(`1970-01-01T${booking.endTime}Z`).getTime();
+            const slotStart = currentTime.getTime();
+            const slotEnd = slotStart + bookingDurationMs;
+            return (slotStart < bookingEnd) && (slotEnd > bookingStart);
+        });
 
         if (isSlotAvailable) {
             slots.push(slotStartTimeStr);
         }
-        // Increment time by service duration or a fixed interval (e.g., 15/30 mins)
-        currentTime = new Date(currentTime.getTime() + bookingDurationMs); // Increment by service duration
-        // Or increment by fixed interval: currentTime.setMinutes(currentTime.getMinutes() + 30);
+        currentTime = new Date(currentTime.getTime() + bookingDurationMs);
     }
     return slots;
 }
-
 
 const DateTimeSelector = () => {
   const { state, dispatch } = useBooking();
@@ -53,12 +55,12 @@ const DateTimeSelector = () => {
           const data = await getBarberAvailability(state.selectedBarberId!, selectedDateStr);
           setAvailability(data); // Store the raw available blocks
 
-          // --- Generate concrete time slots based on availability blocks and service duration ---
+          // Fetch existing bookings for this barber and date to exclude booked slots
+          const existingBookings = await getBookingsForBarberAndDate(state.selectedBarberId!, selectedDateStr);
+
+          // Generate concrete time slots based on availability blocks and service duration
           if (data.length > 0 && state.selectedServiceDuration) {
               let generatedSlots: string[] = [];
-              // TODO: Fetch existing bookings for this barber/date to exclude booked slots
-              // const existingBookings = await getBookingsForBarberAndDate(state.selectedBarberId, selectedDateStr);
-              const existingBookings: any[] = []; // Placeholder
 
               data.forEach(slotBlock => {
                  generatedSlots = [
@@ -71,7 +73,6 @@ const DateTimeSelector = () => {
           } else {
               setAvailableTimeSlots([]);
           }
-          // -------------------------------------------------------------------------------------
 
         } catch (err) {
           setError(`Failed to load availability for ${selectedDateStr}.`);
@@ -85,7 +86,7 @@ const DateTimeSelector = () => {
         setAvailability([]); // Clear if barber/date not selected
         setAvailableTimeSlots([]);
     }
-  }, [state.selectedBarberId, selectedDateStr, state.selectedServiceDuration]); // Re-fetch when these change
+  }, [state.selectedBarberId, selectedDateStr, state.selectedServiceDuration]);
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const newDateStr = event.target.value;

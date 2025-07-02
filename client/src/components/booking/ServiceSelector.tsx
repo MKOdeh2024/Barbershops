@@ -1,31 +1,55 @@
-// Example: src/components/booking/ServiceSelector.tsx (Simplified)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBooking } from '../../context/BookingContext';
 import Button from '../../components/Button';
+import { getServices } from '../../services/serviceService';
+import { Service } from '../../types/serviceTypes'; // Import Service type
 
 const ServiceSelector = () => {
   const { dispatch } = useBooking();
-  // TODO: Fetch services from API
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSelectService = (serviceId: number, serviceName: string, serviceDuration: number) => {
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data: Service[] = await getServices();
+        setServices(data);
+      } catch (err) {
+        setError('Failed to load services. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const handleSelectService = (serviceId: number | string, serviceName: string, serviceDuration: number) => {
     dispatch({
         type: 'SELECT_SERVICE',
         payload: { id: serviceId, name: serviceName, duration: serviceDuration }
     });
-    // No need to manually call next step if reducer handles it
   };
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Step 1: Select Service</h2>
-      {/* Render service options here */}
+      {loading && <p>Loading services...</p>}
+      {error && <p className="text-red-600">{error}</p>}
       <div className="space-y-2">
-          {/* Example Service */}
-          <div className="border p-3 rounded flex justify-between items-center">
-              <span>Classic Haircut (30 min)</span>
-              <Button size="sm" onClick={() => handleSelectService(1, 'Classic Haircut', 30)}>Select</Button>
-          </div>
-           {/* Add more services */}
+        {services.length > 0 ? (
+          services.map(service => (
+            <div key={service.service_id} className="border p-3 rounded flex justify-between items-center">
+              <span>{service.name} ({service.estimated_duration} min)</span>
+              <Button size="sm" onClick={() => handleSelectService(service.service_id, service.name, service.estimated_duration)}>Select</Button>
+            </div>
+          ))
+        ) : (
+          !loading && <p>No services available.</p>
+        )}
       </div>
     </div>
   );

@@ -41,6 +41,16 @@ export const createBooking = async (bookingDetails: CreateBookingData): Promise<
     }
 };
 
+export const getBookingsForBarberAndDate = async (barberId: number | string, dateStr: string): Promise<any[]> => {
+    try {
+        const response = await api.get<any[]>(`/bookings/barber/${barberId}/date/${dateStr}`);
+        return response.data;
+    } catch (error) {
+        console.error('Get Bookings for Barber and Date API call failed:', error);
+        throw error;
+    }
+};
+
 
 // Add functions for fetching user's bookings (getMyUpcomingBookings, getBookingHistory)
 // Add function for cancelling a booking (cancelBooking(bookingId))
