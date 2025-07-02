@@ -16,8 +16,26 @@ const userRepository = AppDataSource.getRepository(User);
 export const registerUser = async (req, res) => {
   const { first_name, last_name, email, password, phone_number, role } = req.body; // Role might be restricted
 
+  // Allowed roles matching User model enum
+  const allowedRoles = ['Admin', 'barber', 'Co-Barber', 'Client'];
+
   try {
-    // TODO: Add validation (e.g., using express-validator or joi)
+    // Basic validation
+    if (!first_name || !last_name || !email || !password) {
+      return res.status(400).json({ message: 'First name, last name, email, and password are required.' });
+    }
+
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({ message: `Invalid role. Allowed roles are: ${allowedRoles.join(', ')}` });
+    }
+
+    // Normalize role to match enum casing if needed
+    let normalizedRole = role;
+    if (role === 'Admin') normalizedRole = 'Admin';
+    else if (role === 'Co-Barber') normalizedRole = 'Co-Barber';
+    else if (role === 'Client') normalizedRole = 'Client';
+    else if (role === 'barber') normalizedRole = 'barber';
+    else normalizedRole = 'Client'; // Default
 
     const userExists = await userRepository.findOneBy({ email });
     if (userExists) {
@@ -39,7 +57,7 @@ export const registerUser = async (req, res) => {
     user.last_name = last_name;
     user.email = email;
     user.phone_number = phone_number;
-    user.role = role || 'Client'; // Default to Client if not provided or restricted
+    user.role = normalizedRole; // Use normalized role
     user.is_verified = false; // Set to false initially
     await user.hashPassword(password); // Hash password using method in User model
 
